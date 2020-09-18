@@ -74,7 +74,12 @@ module MeiliSearch
     end
 
     def validate(response)
-      raise ApiError.new(response.code, response.message, response.body) unless response.success?
+      unless response.success?
+        raise CommunicationError, response.message \
+          if response.headers['content-type'] != 'application/json'
+
+        raise ApiError.new(response.code, response.message, response.body)
+      end
 
       response.parsed_response
     end
